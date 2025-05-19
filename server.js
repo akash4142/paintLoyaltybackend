@@ -21,6 +21,11 @@ app.use(express.json());
 const customerRoutes = require("./routes/customerRoutes");
 const insightRoutes = require("./routes/insightRoutes");
 
+app.get("/", (req, res) => {
+  res.send("🎉 Paint Loyalty Backend is running!");
+});
+
+
 // 🚀 Use Routes
 app.use("/api/customers", customerRoutes);
 app.use("/api/insights", insightRoutes);
