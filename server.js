@@ -16,8 +16,9 @@ process.on("uncaughtException", (err) => {
 // 🔧 Middleware
 
 app.use(cors({
-  origin: ["http://localhost:3000", "https://paint-loyalty-frontend.onrender.com"],
-  credentials: true,
+  origin: ["http://localhost:3000", "https://paint-loyalty-frontend.onrender.com"], // or "*"
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
 
 app.use(express.json());
