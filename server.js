@@ -14,7 +14,12 @@ process.on("uncaughtException", (err) => {
 });
 
 // 🔧 Middleware
-app.use(cors());
+
+app.use(cors({
+  origin: ["http://localhost:3000", "https://paint-loyalty-frontend.onrender.com"],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // 📁 Load Routes
