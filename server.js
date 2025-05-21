@@ -17,7 +17,7 @@ process.on("uncaughtException", (err) => {
 const corsOptions = {
   origin: [
     "http://localhost:3000",
-    "https://paint-loyalty-frontend.onrender.com"
+    "https://paintloyaltyfrontend.onrender.com"
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   // credentials: true, // Enable only if you use cookies/auth
