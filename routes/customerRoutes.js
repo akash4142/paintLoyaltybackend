@@ -57,59 +57,61 @@ router.put("/:id/purchase", async (req, res) => {
     const customer = await Customer.findById(req.params.id);
     if (!customer) return res.status(404).send("Customer not found");
 
-    // 1. 📦 Add to customer purchase history
+    // ✅ Validate input
+    if (!gallons || isNaN(gallons) || gallons < 1) {
+      return res.status(400).json({ error: "Invalid gallons value" });
+    }
+
+    // ➕ Add to purchases
     customer.purchases.push({
       date: new Date().toISOString(),
       gallons,
     });
 
-    // 2. ➕ Update customer total
     customer.totalGallons += gallons;
     await customer.save();
 
-    // 3. 📊 Update monthly insight
-    const currentMonth = new Date().toISOString().slice(0, 7); // e.g., "2025-05"
-    let insight = await insight.findOne({ month: currentMonth });
+    // ✅ Return plain JSON (not a mongoose doc)
+    res.json({
+      _id: customer._id,
+      name: customer.name,
+      phone: customer.phone,
+      totalGallons: customer.totalGallons,
+      freePaintCount: customer.freePaintCount,
+      purchases: customer.purchases,
+      createdAt: customer.createdAt
+    });
 
-    if (!insight) {
-      // 🚀 Create new month record
-      insight = new insight({
-        month: currentMonth,
-        totalGallonsSold: gallons,
-        totalFreeGiven: 0,
-        newCustomers: 0
-      });
-    } else {
-      insight.totalGallonsSold += gallons;
-    }
-
-    await insight.save();
-
-    // 4. ✅ Return updated customer
-    res.json(customer);
   } catch (err) {
-    console.error("❌ Error updating purchase:", err);
-    res.status(500).send(err);
+    console.error("❌ Error in /purchase route:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 
 
-// 🎁 Claim one free paint manually
+
 router.put("/:id/reset", async (req, res) => {
   try {
     const customer = await Customer.findById(req.params.id);
     if (!customer) return res.status(404).send("Customer not found");
 
-    // 🚫 Not enough gallons for a reward
-    if (customer.totalGallons < 8) {
-      return res.status(400).json({ error: "Not enough gallons to claim a free paint." });
+    const totalEarned = Math.floor(customer.totalGallons / 8);
+    const claimed = customer.freePaintCount || 0;
+    const available = totalEarned - claimed;
+
+    if (available <= 0) {
+      return res.status(400).json({ error: "No free paints to claim." });
     }
 
-    // 🧮 Subtract 8 gallons and track claimed reward
-    customer.totalGallons -= 8;
-    customer.freePaintCount = (customer.freePaintCount || 0) + 1;
-    customer.purchases.push({ date: new Date(), note: "🎁 Free Paint Claimed" });
+    // ✅ Just increment free paint count
+    customer.freePaintCount = claimed + 1;
+
+    // 📝 Log the reward claim
+    customer.purchases.push({
+      date: new Date().toISOString(),
+      note: "🎁 Free Paint Claimed"
+    });
 
     await customer.save();
     res.json(customer);
