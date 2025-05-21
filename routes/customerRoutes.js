@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
     const newCustomer = new Customer({
       ...req.body,
       purchases: [],
-      totalGallons: 0,
+      totalGallonsSold: 0,
       freePaintClaimed: false,
       freePaintCount: 0,
       createdAt: new Date()
@@ -41,7 +41,7 @@ router.put("/:id/purchase", async (req, res) => {
     const customer = await Customer.findById(req.params.id);
     if (!customer) return res.status(404).send("Customer not found");
 
-    let updatedGallons = customer.totalGallons + gallons;
+    let updatedGallons = customer.totalGallonsSold + gallons;
     let freePaintClaimed = customer.freePaintClaimed;
 
     // 🎁 If they hit 8+ and haven't claimed yet, mark eligible and subtract 8 gallons
@@ -51,7 +51,7 @@ router.put("/:id/purchase", async (req, res) => {
     }
 
     customer.purchases.push({ date: new Date(), gallons });
-    customer.totalGallons = updatedGallons;
+    customer.totalGallonsSold = updatedGallons;
     customer.freePaintClaimed = freePaintClaimed;
 
     const updated = await customer.save();

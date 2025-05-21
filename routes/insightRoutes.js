@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
     const customers = await Customer.find({});
 
     let newCustomers = 0;
-    let totalGallons = 0;
+    let totalGallonsSold = 0;
     let totalFreeGiven = 0;
 
     customers.forEach((customer) => {
@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
         return date >= startOfMonth;
       });
 
-      totalGallons += purchasesThisMonth.reduce(
+      totalGallonsSold += purchasesThisMonth.reduce(
         (sum, p) => sum + (p.gallons || 0),
         0
       );
@@ -49,7 +49,7 @@ router.get("/", async (req, res) => {
     const newInsight = new Insight({
       month: currentMonth,
       newCustomers,
-      totalGallonsSold: totalGallons,
+      totalGallonsSold,
       totalFreeGiven,
       createdAt: new Date(),
     });
