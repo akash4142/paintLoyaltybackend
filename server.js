@@ -13,24 +13,43 @@ process.on("uncaughtException", (err) => {
   console.error("🚨 Uncaught Exception:", err);
 });
 
-// 🔧 Middleware
-
-app.use(cors({
-  origin: ["http://localhost:3000", "https://paint-loyalty-frontend.onrender.com"], // or "*"
+// 🔧 CORS Configuration
+const corsOptions = {
+  origin: [
+    "http://localhost:3000",
+    "https://paint-loyalty-frontend.onrender.com"
+  ],
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+  // credentials: true, // Enable only if you use cookies/auth
+};
 
+app.use(cors(corsOptions));
+
+// 🧪 Optional CORS debug logging
+app.use((req, res, next) => {
+  console.log("🔄 Request Origin:", req.headers.origin);
+  next();
+});
+
+// 🛡 Fallback CORS headers (for Render preflight issues)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // Or restrict to specific domain
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+// 🧩 Middleware
 app.use(express.json());
 
 // 📁 Load Routes
 const customerRoutes = require("./routes/customerRoutes");
 const insightRoutes = require("./routes/insightRoutes");
 
+// 🏠 Default Route
 app.get("/", (req, res) => {
   res.send("🎉 Paint Loyalty Backend is running!");
 });
-
 
 // 🚀 Use Routes
 app.use("/api/customers", customerRoutes);
